@@ -1,0 +1,86 @@
+{
+  "variables": {
+    "vsphere_server": "",
+    "vsphere_user": "",
+    "vsphere_password": "",
+    "vsphere_datacenter": "",
+    "vsphere_cluster": "",
+    "vsphere_network": "",
+    "vsphere_datastore": "",
+    "vsphere_folder": "",
+    "vm_name": "px-centos7-template",
+    "vm_cpu_num": "4",
+    "vm_mem_size": "8196",
+    "vm_disk_size": "40000",
+    "iso_url": "",
+    "kickstart_file": "ks.cfg"
+  },
+  "builders": [
+    {
+      "CPUs": "{{user `vm_cpu_num`}}",
+      "RAM": "{{user `vm_mem_size`}}",
+      "RAM_reserve_all": false,
+      "boot_command": [
+        "<esc><wait>",
+       "linux ks=hd:fd0:/{{user `kickstart_file`}}<enter><wait>"
+      ],
+      "boot_order": "disk,cdrom,floppy",
+      "boot_wait": "10s",
+      "cluster": "{{user `vsphere_cluster`}}",
+      "convert_to_template": true,
+      "datacenter": "{{user `vsphere_datacenter`}}",
+      "datastore": "{{user `vsphere_datastore`}}",
+      "disk_controller_type": "pvscsi",
+      "floppy_files": [
+        "{{user `kickstart_file`}}"
+      ],
+      "folder": "{{user `vsphere_folder`}}",
+      "guest_os_type": "centos7_64Guest",
+      "insecure_connection": "true",
+      "iso_paths": [
+        "{{user `iso_url`}}"
+      ],
+      "network_adapters": [
+        {
+          "network": "{{user `vsphere_network`}}",
+          "network_card": "vmxnet3"
+        }
+      ],
+      "notes": "Build via Packer",
+      "password": "{{user `vsphere_password`}}",
+      "storage": [
+        {
+          "disk_size": "{{user `vm_disk_size`}}",
+          "disk_thin_provisioned": true
+        }
+      ],
+      "type": "vsphere-iso",
+      "username": "{{user `vsphere_user`}}",
+      "vcenter_server": "{{user `vsphere_server`}}",
+      "vm_name": "{{user `vm_name`}}",
+      "ssh_username": "root",
+      "ssh_password": "portworx",
+      "configuration_parameters": {
+          "guestinfo.metadata": "---",
+          "guestinfo.metadata.encoding": "---",
+          "guestinfo.userdata": "---",
+          "guestinfo.userdata.encoding": "---",
+	  "pxd.deployment": "---",
+	  "pxd.hostname": "---"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "inline": [
+        "sudo yum upgrade -y",
+        "sudo yum install -y cloud-init",
+        "sudo yum install -y epel-release",
+        "sudo yum install -y python-pip",
+        "sudo pip install --upgrade pip",
+        "sudo curl -sSL https://raw.githubusercontent.com/vmware/cloud-init-vmware-guestinfo/master/install.sh | sudo sh -"
+      ],
+      "type": "shell"
+    }
+  ]
+}
