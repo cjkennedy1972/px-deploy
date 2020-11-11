@@ -11,7 +11,7 @@ RUN tar xzf google-cloud-sdk-278.0.0-linux-x86_64.tar.gz
 RUN rm google-cloud-sdk-278.0.0-linux-x86_64.tar.gz
 RUN ln -s /google-cloud-sdk/bin/gcloud /usr/bin/gcloud
 RUN gcloud components install alpha -q
-RUN rpm -i https://releases.hashicorp.com/vagrant/2.2.9/vagrant_2.2.9_x86_64.rpm
+RUN rpm -i https://releases.hashicorp.com/vagrant/2.2.13/vagrant_2.2.13_x86_64.rpm
 RUN vagrant plugin install vagrant-google --plugin-version 2.5.0
 RUN vagrant plugin install vagrant-aws
 RUN vagrant plugin install vagrant-azure
@@ -22,6 +22,9 @@ RUN vagrant box add azure https://github.com/azure/vagrant-azure/raw/v2.0/dummy.
 RUN pip3 install awscli
 RUN curl -Ls https://github.com/vmware/govmomi/releases/download/v0.23.0/govc_linux_amd64.gz | zcat >/usr/bin/govc
 RUN chmod 755 /usr/bin/govc
+RUN yum install -y yum-utils
+RUN yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+RUN yum install -y packer
 RUN go get -u github.com/olekukonko/tablewriter
 RUN go get -u github.com/spf13/cobra/cobra
 RUN go get -u github.com/google/uuid
@@ -30,4 +33,5 @@ RUN go get -u github.com/imdario/mergo
 RUN mkdir /root/go/src/px-deploy
 COPY px-deploy.go /root/go/src/px-deploy/main.go
 COPY vagrant /px-deploy/vagrant
+COPY packer /px-deploy/packer
 RUN go install px-deploy
